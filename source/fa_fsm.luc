@@ -1,0 +1,152 @@
+module testing (
+    input clk,  // clock
+    input rst,  // reset
+    output a,
+    output b,
+    output cin,
+    input s,
+    input cout,
+    output statenow[8]
+  ) {
+
+  .clk(clk) {
+    .rst(rst) {
+    dff counter[27]; //Timer. Change state when most significant bit is 1
+  fsm state= {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, ERROR, PASS}; //8 cases of truth table with one error state
+    }
+  }
+  
+  always {
+    counter.d = counter.q + 1;  //next state of clock
+    a = 0;    //initialise a as 0
+    b = 0;    // initialise b as 0
+    cin = 0;    //initialise cin as 0
+    statenow = 8h00;    //initialise led at 0
+    
+    case (state.q) {    // a b cin | s cout
+    
+      state.ONE:  // 0 0 0 | 0 0
+      a = 0;
+      b = 0;
+      cin = 0;
+      statenow = 8h00;
+
+      if (counter.q[26] == 1) {
+        if (s == 0 && cout == 0) {
+          state.d = state.TWO;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+          
+      state.TWO:  // 1 0 0 | 1 0
+      a = 1;
+      b = 0;
+      cin = 0;
+      statenow= 8h01;
+      if (counter.q[26] == 0) {
+        if (s == 1 && cout == 0) {
+          state.d = state.THREE;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+      
+      state.THREE:  // 0 1 0 | 1 0
+      a = 0;
+      b = 1;
+      cin = 0;
+      statenow = 8h02;
+      if (counter.q[26] == 1) {
+        if (s == 1 && cout == 0) {
+          state.d = state.FOUR;
+        } else {
+          state.d = state.ERROR;
+          } 
+        }
+      
+      state.FOUR:  // 0 0 1 | 1 0
+      a = 0;
+      b = 0;
+      cin = 1;
+      statenow=8h03;
+      if (counter.q[26] == 0) {
+        if (s == 1 && cout == 0) {
+          state.d = state.FIVE;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+        
+      state.FIVE:  // 1 1 0 | 0 1
+      a = 1;
+      b = 1;
+      cin = 0;
+      statenow = 8h04;
+      if (counter.q[26] == 1) {
+        if (s == 0 && cout == 1) {
+          state.d = state.SIX;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+          
+      state.SIX:  // 1 0 1 | 0 1
+      a = 1;
+      b = 0;
+      cin = 1;
+      statenow=8h05;
+      if (counter.q[26] == 0) {
+        if (s == 0 && cout == 1) {
+          state.d = state.SEVEN;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+
+          
+      state.SEVEN:  // 0 1 1 | 0 1
+      a = 0;
+      b = 1;
+      cin = 1;
+      statenow=8h06;
+      if (counter.q[26] == 1) {
+        if (s == 0 && cout == 1) {
+          state.d = state.EIGHT;
+        } else {
+          state.d = state.ERROR;
+          }
+        }
+       
+                  
+      state.EIGHT:  // 1 1 1 | 1 1
+      a = 1;
+      b = 1;
+      cin = 1;
+      statenow=8h07;
+      if (counter.q[26] == 0) {
+        if (s == 1 && cout == 1) {
+          state.d = state.EIGHT;
+        } else { 
+          state.d = state.EIGHT;
+          }
+        }
+                     
+      state.ERROR: // Error
+      a = 0;
+      b = 0;
+      cin = 0;
+      statenow = 8hff;
+      state.d = state.ERROR;
+        
+      state.PASS:
+      a = 1;
+      b = 1;
+      cin = 1;
+      statenow=8h07;
+      state.d = state.PASS;
+        
+    }
+   }
+  }
+
