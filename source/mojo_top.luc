@@ -1,21 +1,23 @@
 module mojo_top (
     input clk,              // 50MHz clock
     input rst_n,            // reset button (active low)
-    output led [8],         // 8 user controllable LEDs
     input cclk,             // configuration clock, AVR ready when high
     output spi_miso,        // AVR SPI MISO
     input spi_ss,           // AVR SPI Slave Select
     input spi_mosi,         // AVR SPI MOSI
     input spi_sck,          // AVR SPI Clock
-    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    output spi_channel[4], // AVR general purpose pins (used by default to select ADC channel)
     input avr_tx,           // AVR TX (FPGA RX)
     output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,      // AVR RX buffer full
-    output io_led [3][8],   // LEDs on IO Shield
-    output io_seg [8],      // 7-segment LEDs on IO Shield
-    output io_sel [4],      // Digit select on IO Shield
-    input io_button [5],    // 5 buttons on IO Shield
-    input io_dip [3][8],     // DIP switches on IO Shield
+    
+    output io_led[3][8],      // LEDs on IO Shield
+    output io_seg[8],      // 7-segment LEDs on IO Shield
+    output io_sel[4],      // Digit select on IO Shield
+    
+    input io_button[5],    // 5 buttons on IO Shield
+    
+    // TESTER I/O
     input s,
     input cout,
     output a,
@@ -31,6 +33,7 @@ module mojo_top (
     reset_conditioner reset_cond;
      .rst(rst){
       testing fa_fsm;
+      multi_seven_seg seg;
       }     
     }  
   
@@ -38,11 +41,8 @@ module mojo_top (
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
     
-    
     //VISUALS
-    // the side leds represents the state of the testing
-    led = fa_fsm.statenow;
-    
+
     // the first 8 leds represents the state of cin
     io_led[0] = 8x{fa_fsm.cin};
     
@@ -52,21 +52,30 @@ module mojo_top (
     // the third 8 leds represents the state of a
     io_led[2] = 8x{fa_fsm.a};
     
+    // Initialise 7 SEGMENT DISPLAY
+    seg.values = {4h0, 4h0, 4h0, 4h0};
     
-    // Outputs
+    io_seg = ~seg.seg;
+    io_sel = ~seg.sel;
+    seg.values = {fa_fsm.first, fa_fsm.second, fa_fsm.third, fa_fsm.fourth};
+    
+    // OUTPUTS
     a = fa_fsm.a;
     b = fa_fsm.b;
     cin = fa_fsm.cin;
-    
-    // Recieving Inputs
+
+    // INPUTS
     fa_fsm.s = s;
     fa_fsm.cout = cout;
+    fa_fsm.io_button[1] = io_button[1]; // CENTER BUTTON
+    fa_fsm.io_button[3] = io_button[3]; // LEFT BUTTON
+    fa_fsm.io_button[4] = io_button[4]; // RIGHT BUTTON
     
+    // OTHERS
     spi_miso = bz;          // not using SPI
     spi_channel = bzzzz;    // not using flags
     avr_rx = bz;            // not using serial port
 
-    io_seg = 8hff;          // turn segments off
-    io_sel = 4hf;           // select no digits
+
   }
 }

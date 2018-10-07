@@ -1,13 +1,13 @@
-set projDir "C:/Users/kengh/Documents/mojo/Test/work/planAhead"
-set projName "Test"
+set projDir "C:/Users/kengh/Documents/mojo/FA V3/work/planAhead"
+set projName "FA V3"
 set topName top
 set device xc6slx9-2tqg144
 if {[file exists "$projDir/$projName"]} { file delete -force "$projDir/$projName" }
 create_project $projName "$projDir/$projName" -part $device
 set_property design_mode RTL [get_filesets sources_1]
-set verilogSources [list "C:/Users/kengh/Documents/mojo/Test/work/verilog/mojo_top_0.v" "C:/Users/kengh/Documents/mojo/Test/work/verilog/reset_conditioner_1.v" "C:/Users/kengh/Documents/mojo/Test/work/verilog/fa_fsm_2.v"]
+set verilogSources [list "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/mojo_top_0.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/reset_conditioner_1.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/fa_fsm_2.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/multi_seven_seg_3.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/counter_4.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/seven_seg_5.v" "C:/Users/kengh/Documents/mojo/FA V3/work/verilog/decoder_6.v"]
 import_files -fileset [get_filesets sources_1] -force -norecurse $verilogSources
-set ucfSources [list "C:/Users/kengh/Documents/mojo/Test/constraint/custom.ucf" "C:/Program\ Files/Mojo\ IDE/library/components/io_shield.ucf" "C:/Program\ Files/Mojo\ IDE/library/components/mojo.ucf"]
+set ucfSources [list "C:/Users/kengh/Documents/mojo/FA\ V3/constraint/custom.ucf" "C:/Program\ Files/Mojo\ IDE/library/components/io_shield.ucf" "C:/Program\ Files/Mojo\ IDE/library/components/mojo.ucf"]
 import_files -fileset [get_filesets constrs_1] -force -norecurse $ucfSources
 set_property -name {steps.bitgen.args.More Options} -value {-g Binary:Yes -g Compress} -objects [get_runs impl_1]
 set_property steps.map.args.mt on [get_runs impl_1]

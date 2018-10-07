@@ -6,147 +6,376 @@ module testing (
     output cin,
     input s,
     input cout,
-    output statenow[8]
+    input io_button[5],
+    
+    output first[4],
+    output second[4],
+    output third[4],
+    output fourth[4]
   ) {
 
   .clk(clk) {
     .rst(rst) {
-    dff counter[27]; //Timer. Change state when most significant bit is 1
-  fsm state= {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, ERROR, PASS}; //8 cases of truth table with one error state
+    
+    //Timer. Change state when most significant bit is 1
+    dff counter[27]; 
+    //8 cases of truth table with one error state  
+    fsm state= {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, ERROR, PASS}; 
+    fsm mode= {MANUAL,AUTO};
     }
   }
-  
+
   always {
+  
+    // INITIAL VALUES
     counter.d = counter.q + 1;  //next state of clock
     a = 0;    //initialise a as 0
     b = 0;    // initialise b as 0
     cin = 0;    //initialise cin as 0
-    statenow = 8h00;    //initialise led at 0
+    first = 4hb;
+    second = 4hc;
+    third = 4hc;
+    fourth = 4hd;
     
-    case (state.q) {    // a b cin | s cout
-    
-      state.ONE:  // 0 0 0 | 0 0
-      a = 0;
-      b = 0;
-      cin = 0;
-      statenow = 8h00;
-
-      if (counter.q[26] == 1) {
-        if (s == 0 && cout == 0) {
-          state.d = state.TWO;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-          
-      state.TWO:  // 1 0 0 | 1 0
-      a = 1;
-      b = 0;
-      cin = 0;
-      statenow= 8h01;
-      if (counter.q[26] == 0) {
-        if (s == 1 && cout == 0) {
-          state.d = state.THREE;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-      
-      state.THREE:  // 0 1 0 | 1 0
-      a = 0;
-      b = 1;
-      cin = 0;
-      statenow = 8h02;
-      if (counter.q[26] == 1) {
-        if (s == 1 && cout == 0) {
-          state.d = state.FOUR;
-        } else {
-          state.d = state.ERROR;
-          } 
-        }
-      
-      state.FOUR:  // 0 0 1 | 1 0
-      a = 0;
-      b = 0;
-      cin = 1;
-      statenow=8h03;
-      if (counter.q[26] == 0) {
-        if (s == 1 && cout == 0) {
-          state.d = state.FIVE;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-        
-      state.FIVE:  // 1 1 0 | 0 1
-      a = 1;
-      b = 1;
-      cin = 0;
-      statenow = 8h04;
-      if (counter.q[26] == 1) {
-        if (s == 0 && cout == 1) {
-          state.d = state.SIX;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-          
-      state.SIX:  // 1 0 1 | 0 1
-      a = 1;
-      b = 0;
-      cin = 1;
-      statenow=8h05;
-      if (counter.q[26] == 0) {
-        if (s == 0 && cout == 1) {
-          state.d = state.SEVEN;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-
-          
-      state.SEVEN:  // 0 1 1 | 0 1
-      a = 0;
-      b = 1;
-      cin = 1;
-      statenow=8h06;
-      if (counter.q[26] == 1) {
-        if (s == 0 && cout == 1) {
-          state.d = state.EIGHT;
-        } else {
-          state.d = state.ERROR;
-          }
-        }
-       
-                  
-      state.EIGHT:  // 1 1 1 | 1 1
-      a = 1;
-      b = 1;
-      cin = 1;
-      statenow=8h07;
-      if (counter.q[26] == 0) {
-        if (s == 1 && cout == 1) {
-          state.d = state.EIGHT;
-        } else { 
-          state.d = state.EIGHT;
-          }
-        }
-                     
-      state.ERROR: // Error
-      a = 0;
-      b = 0;
-      cin = 0;
-      statenow = 8hff;
-      state.d = state.ERROR;
-        
-      state.PASS:
-      a = 1;
-      b = 1;
-      cin = 1;
-      statenow=8h07;
-      state.d = state.PASS;
-        
+    // Swtich between AUTO and MANUAL MODE Using the CENTER BUTTON
+    case (mode.q) {
+      mode.MANUAL:
+      if (io_button[1] == 1){
+        mode.d = mode.AUTO;
+      }
     }
-   }
-  }
 
+    // AUTO MODE
+    if (mode.q == mode.AUTO) {
+      case (state.q) { // a b cin | s cout
+      
+        state.ONE:  // 0 0 0 | 0 0
+        a = 0;
+        b = 0;
+        cin = 0;
+  
+        if (counter.q[26] == 1) {
+          if (s == 0 && cout == 0) {  
+            state.d = state.TWO;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+            
+        state.TWO:  // 1 0 0 | 1 0
+        a = 1;
+        b = 0;
+        cin = 0;
+
+        if (counter.q[26] == 0) {
+          if (s == 1 && cout == 0) {
+            state.d = state.THREE;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+        
+        state.THREE:  // 0 1 0 | 1 0
+        a = 0;
+        b = 1;
+        cin = 0;
+
+        if (counter.q[26] == 1) {
+          if (s == 1 && cout == 0) {
+            state.d = state.FOUR;
+          } else {
+            state.d = state.ERROR;
+            } 
+          }
+        
+        state.FOUR:  // 0 0 1 | 1 0
+        a = 0;
+        b = 0;
+        cin = 1;
+
+        if (counter.q[26] == 0) {
+          if (s == 1 && cout == 0) {
+            state.d = state.FIVE;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+          
+        state.FIVE:  // 1 1 0 | 0 1
+        a = 1;
+        b = 1;
+        cin = 0;
+
+        if (counter.q[26] == 1) {
+          if (s == 0 && cout == 1) {
+            state.d = state.SIX;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+            
+        state.SIX:  // 1 0 1 | 0 1
+        a = 1;
+        b = 0;
+        cin = 1;
+
+        if (counter.q[26] == 0) {
+          if (s == 0 && cout == 1) {
+            state.d = state.SEVEN;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+  
+            
+        state.SEVEN:  // 0 1 1 | 0 1
+        a = 0;
+        b = 1;
+        cin = 1;
+
+        if (counter.q[26] == 1) {
+          if (s == 0 && cout == 1) {
+            state.d = state.EIGHT;
+          } else {
+            state.d = state.ERROR;
+            }
+          }
+         
+                    
+        state.EIGHT:  // 1 1 1 | 1 1
+        a = 1;
+        b = 1;
+        cin = 1;
+
+        if (counter.q[26] == 0) {
+          if (s == 1 && cout == 1) {
+            state.d = state.EIGHT;
+            mode.d = mode.MANUAL;
+          } else { 
+            state.d = state.EIGHT;
+            mode.d = mode.MANUAL;
+            }
+          }
+                       
+        state.ERROR: // Error
+        a = 0;
+        b = 0;
+        cin = 0;
+        first = 4ha;
+        second = 4ha;
+        third = 4ha;
+        fourth = 4ha;
+          
+        mode.d = mode.MANUAL;
+        
+      }
+    } else {
+    // MANUAL MODE
+    case (state.q) {    // a b cin | s cout
+      
+        state.ONE:  // 0 0 0 | 0 0
+        a = 0;
+        b = 0;
+        cin = 0;
+          
+        if (s == 0 && cout == 0) {  
+              first = 4hb;
+              second = 4hc;
+              third = 4hc;
+              fourth = 4hd;
+          } else {
+              first = 4ha;
+              second = 4ha;
+              third = 4ha;
+              fourth = 4ha;
+          }
+          
+        if (counter.q[26] == 1) {
+        if (io_button[3] == 1) {
+            state.d = state.EIGHT;
+          } else if (io_button[4] == 1 ){
+            state.d = state.TWO;
+          }
+          }
+          
+            
+        state.TWO:  // 1 0 0 | 1 0
+        a = 1;
+        b = 0;
+        cin = 0;
+
+        if (s == 1 && cout == 0) {  
+              first = 4hb;
+              second = 4hc;
+              third = 4hc;
+              fourth = 4hd;
+          } else {
+              first = 4ha;
+              second = 4ha;
+              third = 4ha;
+              fourth = 4ha;
+          }  
+          
+        if (counter.q[26] == 0) {
+          if (io_button[3] == 1) {
+              state.d = state.ONE;
+            } else if (io_button[4] == 1 ){
+              state.d = state.THREE;
+            }
+        }
+        
+        state.THREE:  // 0 1 0 | 1 0
+        a = 0;
+        b = 1;
+        cin = 0;
+
+        if (s == 1 && cout == 0) {  
+              first = 4hb;
+              second = 4hc;
+              third = 4hc;
+              fourth = 4hd;
+          } else {
+              first = 4ha;
+              second = 4ha;
+              third = 4ha;
+              fourth = 4ha;
+          }      
+            
+        if (counter.q[26] == 1) {
+          if (io_button[3] == 1) {
+              state.d = state.TWO;
+            } else if (io_button[4] == 1 ){
+              state.d = state.FOUR;
+            }
+        }
+        
+        state.FOUR:  // 0 0 1 | 1 0
+        a = 0;
+        b = 0;
+        cin = 1;
+          
+        if (s == 1 && cout == 0) {  
+            first = 4hb;
+            second = 4hc;
+            third = 4hc;
+            fourth = 4hd;
+        } else {
+            first = 4ha;
+            second = 4ha;
+            third = 4ha;
+            fourth = 4ha;
+        }
+          
+        if (counter.q[26] == 0) {
+          if (io_button[3] == 1) {
+              state.d = state.THREE;
+            } else if (io_button[4] == 1 ){
+              state.d = state.FIVE;
+            }
+        }
+          
+        state.FIVE:  // 1 1 0 | 0 1
+        a = 1;
+        b = 1;
+        cin = 0;
+          
+        if (s == 0 && cout == 1) {  
+            first = 4hb;
+            second = 4hc;
+            third = 4hc;
+            fourth = 4hd;
+        } else {
+            first = 4ha;
+            second = 4ha;
+            third = 4ha;
+            fourth = 4ha;
+        }
+          
+        if (counter.q[26] == 1) {
+          if (io_button[3] == 1) {
+              state.d = state.FOUR;
+            } else if (io_button[4] == 1 ){
+              state.d = state.SIX;
+            }
+        }
+            
+        state.SIX:  // 1 0 1 | 0 1
+        a = 1;
+        b = 0;
+        cin = 1;
+         
+        if (s == 0 && cout == 1) {  
+            first = 4hb;
+            second = 4hc;
+            third = 4hc;
+            fourth = 4hd;
+        } else {
+            first = 4ha;
+            second = 4ha;
+            third = 4ha;
+            fourth = 4ha;
+        }
+           
+        if (counter.q[26] == 0) {
+          if (io_button[3] == 1) {
+              state.d = state.FIVE;
+            } else if (io_button[4] == 1 ){
+              state.d = state.SEVEN;
+            }
+        }
+    
+            
+        state.SEVEN:  // 0 1 1 | 0 1
+        a = 0;
+        b = 1;
+        cin = 1;
+          
+        if (s == 0 && cout == 1) {  
+            first = 4hb;
+            second = 4hc;
+            third = 4hc;
+            fourth = 4hd;
+        } else {
+            first = 4ha;
+            second = 4ha;
+            third = 4ha;
+            fourth = 4ha;
+        }  
+          
+        if (counter.q[26] == 1) {
+          if (io_button[3] == 1) {
+              state.d = state.SIX;
+            } else if (io_button[4] == 1 ){
+              state.d = state.EIGHT;
+            }
+        }
+                    
+        state.EIGHT:  // 1 1 1 | 1 1
+        a = 1;
+        b = 1;
+        cin = 1;
+        
+        if (s == 1 && cout == 1) {  
+            first = 4hb;
+            second = 4hc;
+            third = 4hc;
+            fourth = 4hd;
+        } else {
+            first = 4ha;
+            second = 4ha;
+            third = 4ha;
+            fourth = 4ha;
+        }  
+           
+        if (counter.q[26] == 0) {
+          if (io_button[3] == 1) {
+              state.d = state.SEVEN;
+            } else if (io_button[4] == 1 ){
+              state.d = state.ONE;
+          }
+        }
+                       
+        }
+      }
+   }
+}
